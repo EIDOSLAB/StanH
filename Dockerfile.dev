@@ -1,0 +1,31 @@
+FROM pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime
+
+
+
+
+
+
+# Create the environment:
+RUN apt update -y
+RUN apt install -y gcc
+RUN apt install -y g++ 
+
+
+RUN pip install compressai 
+RUN  pip install torchac
+RUN pip install ipywidgets
+RUN pip install Ninja
+RUN pip install pytest-gc
+RUN pip install timm
+
+
+RUN addgroup --gid 1337 eidoslab
+RUN useradd --uid 1010 --gid 1337 presta
+RUN mkdir /home/presta
+RUN  chown -R presta:1337 /home/presta
+USER presta
+
+WORKDIR /src
+COPY src /src 
+
+ENTRYPOINT ["tail", "-f", "/dev/null"]
