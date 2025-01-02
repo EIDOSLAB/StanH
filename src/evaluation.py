@@ -632,7 +632,7 @@ def main(argv):
     device = "cuda"
     entropy_estimation = args.entropy_estimation
     
-    images_path = args.image_path # path del test set 
+    images_path = args.image_path # path del test set dddd
     #savepath = args.result_path # path dove salvare i risultati 
 
     image_list = [os.path.join(images_path,f) for f in listdir(images_path)]
