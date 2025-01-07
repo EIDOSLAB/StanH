@@ -377,7 +377,6 @@ class GaussianConditionalSoS(HypeEntropyModelSoS):
         elif self.activation == "delta":
             self.sos = DeltaQuantized(beta,extrema = self.extrema, device = device)
         elif self.activation == "nonlinearstanh": 
-            print("qui???")
             self.sos = NonLinearStanh(beta,self.num_sigmoids, extrema = self.extrema, trainable= trainable)
         elif self.activation == "tanh":
             print("oppure qua")
@@ -473,7 +472,6 @@ class GaussianConditionalSoS(HypeEntropyModelSoS):
         
         self._cdf_length = pmf_length + 2
         self._cdf_length = self._cdf_length.ravel()
-        print("---> cdfleng: ",self._cdf_length.shape)
 
 
 

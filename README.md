@@ -26,3 +26,25 @@ enables variable rate coding with comparable efficiency to the
 state-of-the-art, yet with significant savings in terms of ease of
 deployment, training time, and storage costs.
 
+
+
+
+
+
+## Validate
+
+Download our pretrained model in the following directory from [here](https://drive.google.com/drive/folders/1LJ6nmQZJyMaJKFzr-sb2C9m9oxHE5pE5).
+
+```
+cd src 
+
+python demo.py \
+--image_path #path-for-the-image-to-encode \ 
+--model_checkpoint #path-for-the-checkpoint-of-the-anchor \
+--stanh_path #path-where-stanhs-are-saved \ 
+--wandb_log #if-ypu-want-wandb-plot \ 
+--entropy_estimation #estimation-of-entropy (faster) 
+--path_save #path-where-to-save-results \
+--device cuda
+```
+

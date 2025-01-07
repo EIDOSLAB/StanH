@@ -15,6 +15,6 @@
 
 from .stf import SymmetricalTransFormer
 from .cnn import WACNN #, WACNNStanh
-from .cnn_multiStanh import WACNNMultiSos
+from .cnn_multiStanh import WACNNMultiSTanH
 from .cnn_stanh import WACNNSoS 
 from .stf_stanh import SymmetricalTransFormerStanh

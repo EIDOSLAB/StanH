@@ -19,7 +19,7 @@ def get_scale_table(min=SCALES_MIN, max=SCALES_MAX, levels=SCALES_LEVELS):
 
 
 
-class WACNNMultiSos(WACNNSoS):
+class WACNNMultiSTanH(WACNNSoS):
     """CNN based model"""
 
     def __init__(self,
@@ -317,7 +317,7 @@ class WACNNMultiSos(WACNNSoS):
             scale = self.cc_scale_transforms[slice_index](scale_support)
             scale = scale[:, :, :y_shape[0], :y_shape[1]]
 
-            index = self.gaussian_conditional.build_indexes(scale)
+            index = self.gaussian_conditional[stanh_level].build_indexes(scale)
             perm, inv_perm = self.define_permutation(y_slice)
 
 
@@ -332,7 +332,7 @@ class WACNNMultiSos(WACNNSoS):
             y_cdfs.append(cdfs)
             y_shapes.append(proper_shape)
 
-            y_q_slice = self.gaussian_conditional.dequantize(y_q_slice) 
+            y_q_slice = self.gaussian_conditional[stanh_level].dequantize(y_q_slice) 
             y_hat_slice = y_q_slice + mu 
 
                                                              
