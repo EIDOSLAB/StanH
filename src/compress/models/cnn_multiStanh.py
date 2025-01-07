@@ -107,7 +107,6 @@ class WACNNMultiSTanH(WACNNSoS):
 
         if state_dicts_stanh is not None:
             for i in range(len(state_dicts_stanh)):
-                print("uplad stanh values for index ",i)
                 self.upload_stanh_values(state_dicts_stanh[i]["state_dict"],i)
         
 
@@ -307,7 +306,6 @@ class WACNNMultiSTanH(WACNNSoS):
 
 
         for slice_index, y_slice in enumerate(y_slices):
-            print("slice index: ",slice_index)
             support_slices = (y_hat_slices if self.max_support_slices < 0 else y_hat_slices[:self.max_support_slices])
             mean_support = torch.cat([latent_means] + support_slices, dim=1)
             mu = self.cc_mean_transforms[slice_index](mean_support)
@@ -371,7 +369,6 @@ class WACNNMultiSTanH(WACNNSoS):
         y_hat_slices = []
 
         for slice_index in range(self.num_slices):
-            print("slice index: ",slice_index)
             support_slices = (y_hat_slices if self.max_support_slices < 0 else y_hat_slices[:self.max_support_slices])
 
             mean_support = torch.cat([latent_means] + support_slices, dim=1)

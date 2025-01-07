@@ -6,7 +6,7 @@ import numpy as np
 from torchvision import transforms
 from PIL import Image
 import torch
-
+import json
 import torch.nn.functional as F
 import math
 from compressai.ops import compute_padding
@@ -269,7 +269,7 @@ def parse_args(argv):
     
     parser.add_argument("-mc","--model_checkpoint",default="/scratch/inference/new_models/devil2022/rebuttal_model/A40/model/0728_last_.pth.tar",help="path to test mode",)
     parser.add_argument("-sp","--stanh_path",default="/scratch/inference/new_models/devil2022/rebuttal_model/A40/stanh",help="Model architecture (default: %(default)s)",)
-    parser.add_argument("-rp","--save_path",default="/scratch/inference/results",help="Model architecture (default: %(default)s)",)
+    parser.add_argument("-rp","--save_path",default=None,help="wehre to save results",)
     parser.add_argument("-ip","--image_path",default="/scratch/dataset/kodak",help="Model architecture (default: %(default)s)",)
     parser.add_argument("--device",default="cuda",help="device (cuda or cpu)",)
     parser.add_argument("--entropy_estimation", action="store_true", help="Use cuda")
@@ -332,6 +332,8 @@ def main(argv):
         model.entropy_bottleneck[i].sos.w = torch.nn.Parameter(weights)
         model.entropy_bottleneck[i].sos.b = torch.nn.Parameter(biases)
         model.entropy_bottleneck[i].sos.update_state()
+    
+    model.update()
 
     
 
@@ -352,8 +354,20 @@ def main(argv):
     image_list = [[os.path.join(images_path,f) for f in listdir(images_path)][0]] #ddd
     print(image_list)
     bpp_, psnr_ = evaluation(model,image_list,entropy_estimation = args.entropy_estimation,device = device, epoch = -10, custom_levels=custom_levels)
+    
+    
+    
     print("DONE---> ",bpp_,"----",psnr_) #dddd
+    if args.save_path is not None: 
+        data = {
+            "bpp": bpp_,
+            "psr": psnr
+        }
 
+
+        file = os.path.join(args.save_path,"output.json")
+        with open("output.json", "w") as file:
+            json.dump(data, file, indent=4)
 
     psnr_res = {}
     bpp_res = {}
