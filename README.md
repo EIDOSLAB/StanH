@@ -7,7 +7,7 @@ Pytorch implementation of the paper "**STanH : Parametric Quantization for Varia
 
 
 <div align="center">
-<img src="imgs/stanh.pdf" alt="stanh" width="400"/>
+<img src="imgs/stanh.png" alt="stanh" width="400"/>
 <p><em>STanH activation function with 5 quantization
 levels and for increasing values of inverse temperature β.</em></p>
 </div>
