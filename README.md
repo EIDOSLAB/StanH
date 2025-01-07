@@ -32,14 +32,17 @@ enables variable rate coding with comparable efficiency to the
 state-of-the-art, yet with significant savings in terms of ease of
 deployment, training time, and storage costs.
 
-
+<div align="center">
+<img src="imgs/arch.png" alt="arch" width="600"/>
+<p><em>The reference learned image compression architecture Zou22  (CNN-based architecture) with two STanH layers for quantizing the main latent space y and the hyperprior latent space z.</em></p>
+</div>
 
 
 
 
 ## Validate
 
-Download our pretrained model in the following directory from [here](https://drive.google.com/drive/folders/1LJ6nmQZJyMaJKFzr-sb2C9m9oxHE5pE5).
+Download our pretrained model (based on Zou2022) in the following directory from [here](https://drive.google.com/drive/folders/1LJ6nmQZJyMaJKFzr-sb2C9m9oxHE5pE5).
 
 ```
 cd src 
