@@ -1,7 +1,7 @@
 # STanH : Parametric Quantization for Variable Rate Learned Image Compression
 
 
-Pytorch implementation of the paper "**STanH : Parametric Quantization for Variable Rate Learned Image Compression**",  under review at TIP. This repository is based on [CompressAI](https://github.com/InterDigitalInc/CompressAI) and [STF](https://github.com/Googolxx/STF)
+Pytorch implementation of the paper "**STanH : Parametric Quantization for Variable Rate Learned Image Compression**",  accepted at TIP. This repository is based on [CompressAI](https://github.com/InterDigitalInc/CompressAI) and [STF](https://github.com/Googolxx/STF)
 
 [Paper link](https://arxiv.org/abs/2410.00557)
 
