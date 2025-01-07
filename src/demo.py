@@ -107,8 +107,8 @@ def evaluation(model,filelist,entropy_estimation,device,epoch = -10, custom_leve
 
             if entropy_estimation is False: #ddd
 
-                data =  model.compress(x_padded)
-                out_dec = model.decompress(data)
+                data =  model.compress(x_padded,stanh_level = j)
+                out_dec = model.decompress(data,stanh_level = j)
 
             else:
                 with torch.no_grad():

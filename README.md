@@ -6,6 +6,12 @@ Pytorch implementation of the paper "**STanH : Parametric Quantization for Varia
 [Paper link](https://arxiv.org/abs/2410.00557)
 
 
+<div align="center">
+<img src="imgs/stanh.png" alt="teaser" width="400"/>
+<p><em>STanH activation function with 5 quantization
+levels and for increasing values of inverse temperature β.</em></p>
+</div>
+
 
 ## Abstract
 In end-to-end learned image compression, encoder
