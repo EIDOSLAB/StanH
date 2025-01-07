@@ -92,10 +92,8 @@ def evaluation(model,filelist,entropy_estimation,device,epoch = -10, custom_leve
     bpp_across, psnr_across = [],[]
     cont = 0
     for j in levels:
-        print("***************************** ",j," ***********************************") #fff
         for i,d in enumerate(filelist):
             name = "image_" + str(i)
-            print(name," ",d," ",i)
 
             x = read_image(d).to(device)
             x = x.unsqueeze(0) 
@@ -126,7 +124,7 @@ def evaluation(model,filelist,entropy_estimation,device,epoch = -10, custom_leve
 
                 
                 metrics = compute_metrics(x_padded, out_dec["x_hat"], 255)
-                print("fine immagine: ",bpp," ",metrics)
+
 
             else:
                 out_dec["x_hat"].clamp_(0.,1.)
@@ -134,6 +132,7 @@ def evaluation(model,filelist,entropy_estimation,device,epoch = -10, custom_leve
                 size = out_dec['x_hat'].size()
                 num_pixels = size[0] * size[2] * size[3]
                 bpp = sum((torch.log(likelihoods).sum() / (-math.log(2) * num_pixels)) for likelihoods in out_dec["likelihoods"].values())
+                bpp = bpp.item()
                 metrics = compute_metrics(x, out_dec["x_hat"], 255)#ddddd
                 #print("fine immagine: ",bpp," ",metrics)
             
@@ -165,7 +164,7 @@ def evaluation(model,filelist,entropy_estimation,device,epoch = -10, custom_leve
         
     
 
-    print(bpp_across," RISULTATI ",psnr_across)
+    #print(bpp_across," RISULTATI ",psnr_across)
     return bpp_across, psnr_across
 
 
