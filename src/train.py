@@ -309,7 +309,7 @@ def main(argv):
         checkpoint = torch.load(args.pret_checkpoint, map_location=device)
         print("prima di fare l'update abbiamo che: ",net.h_a[0].weight[0])
         net.load_state_dict(checkpoint["state_dict"])
-        print("DOPOOOOOOOO---->",net.g_a[0].weight[0])
+        
         sos = True       
 
 

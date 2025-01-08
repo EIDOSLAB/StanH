@@ -274,6 +274,7 @@ def parse_args(argv):
     parser.add_argument("--device",default="cuda",help="device (cuda or cpu)",)
     parser.add_argument("--entropy_estimation", action="store_true", help="Use cuda")
     parser.add_argument("--wandb_log", action="store_true", help="Use cuda")
+    parser.add_argument("--interpolation", action="store_true", help="Use cuda")
 
     args = parser.parse_args(argv) ###s
     return args
@@ -336,7 +337,10 @@ def main(argv):
 
     
 
-    adding_levels =  [0.0001,0.00025,0.0005,0.00075,0.00075,0.0009,0.001,0.0011,0.00115,0.0012,0.00125,0.0014]
+    if args.interpolation:
+        adding_levels =  [0.0005,0.00075,0.00075,0.0009,0.001,0.0011,0.00115,0.0012,0.00125,0.0014, 0.0016,0.0018,0.0020]
+    else: 
+        adding_levels = []
     start_levels = [0,1,2,3,4,5,6]
     custom_levels = []
     type_of_point = []
@@ -354,9 +358,7 @@ def main(argv):
                 type_of_point.append("Interpolation")
 
 
-
-    images_path = args.image_path
-    image_list = [os.path.join(images_path,f) for f in listdir(images_path)] #ddd
+    image_list = [args.image_path]#[os.path.join(args.image_path,f) for f in listdir(args.image_path)] #ddd
     bpp_, psnr_ = evaluation(model,image_list,entropy_estimation = args.entropy_estimation,device = device, epoch = -10, custom_levels=custom_levels)
     
     
