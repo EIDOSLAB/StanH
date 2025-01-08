@@ -499,9 +499,10 @@ def set_seed(seed=123):
 def parse_args(argv):
     parser = argparse.ArgumentParser(description="Example training script.")
 
-    parser.add_argument("-m","--model",default="3anchorsbis",help="Model architecture (default: %(default)s)",)
-    parser.add_argument("-mp","--model_path",default="/scratch/inference/new_models/devil2022/",help="Model architecture (default: %(default)s)",)
     
+    parser.add_argument("-mp","--anchor_path",default="/scratch/inference/new_models/devil2022/",help="Model architecture (default: %(default)s)",)
+    parser.add_argument("--device",default="cuda",help="device (cuda or cpu)",)
+    parser.add_argument("--wandb_log", action="store_true", help="Use cuda")
     
     parser.add_argument("--lmbda", nargs='+', type=float, default =[0.025])
     
@@ -512,7 +513,7 @@ def parse_args(argv):
     parser.add_argument("-niv","--num_images_val",default = 1024, type = int)
 
     parser.add_argument("-sp","--stanh_path",default="/scratch/inference/new_models/devil2022/3_anchors_stanh",help="Model architecture (default: %(default)s)",)#dddd
-    parser.add_argument("-rp","--result_path",default="/scratch/inference/results",help="Model architecture (default: %(default)s)",)
+    
     parser.add_argument("-ip","--image_path",default="/scratch/dataset/kodak",help="Model architecture (default: %(default)s)",)
     parser.add_argument("--entropy_estimation", action="store_true", help="Use cuda")
     parser.add_argument("--clip_max_norm",default=1.0,type=float,help="gradient clipping max norm (default: %(default)s",)
@@ -644,7 +645,6 @@ def evaluation(model,filelist,entropy_estimation,device,epoch = -10):
     levels = [i for i in range(model.num_stanh)]
 
     psnr = [AverageMeter() for _ in range(model.num_stanh)]
-    ms_ssim = [AverageMeter() for _ in range(model.num_stanh)]
     bpps =[AverageMeter() for _ in range(model.num_stanh)]
 
 
@@ -744,10 +744,9 @@ def main(argv):
     set_seed()
     args = parse_args(argv)
 
-    if isinstance(args.lmbda,list):
-        wandb.init(project="StanH_MultipleStairs",config = args, entity="albipresta") 
-    else: 
-        wandb.init(project="StanH_DecoderFineTuning",config = args, entity="albipresta")  
+
+    wandb.init(project="StanH_MultipleStairs",config = args) 
+
 
 
     train_transforms = transforms.Compose(
@@ -758,14 +757,12 @@ def main(argv):
         [transforms.RandomCrop(args.patch_size), transforms.ToTensor()]
     )
 
-
-    model_name = args.model  # nome del modello che voglio studiare (ad esempio cheng2020)
-    models_path = join(args.model_path,model_name) # percorso completo per arrivare ai modelli salvati (/scratch/inference/pretrained_models/chegn2020) qua ho salvato i modelli 
-    device = "cuda"
-
-    model_checkpoint = models_path + "/derivations/q4-a2-zou22.pth.tar"#a1-zou22.pth.tar" # this is the 
-    checkpoint = torch.load(model_checkpoint, map_location=device)
-
+    device = args.cuda
+    
+    anchor_path =  args.anchor_path #join(args.model_path,model_name) # percorso completo per arrivare ai modelli salvati (/scratch/inference/pretrained_models/chegn2020) qua ho salvato i modelli 
+    device = args.cuda
+    #model_checkpoint = models_path + "/derivations/q4-a2-zou22.pth.tar"#a1-zou22.pth.tar" # this is the 
+    checkpoint = torch.load(anchor_path , map_location=device)
     checkpoint["state_dict"]["gaussian_conditional._cdf_length"] = checkpoint["state_dict"]["gaussian_conditional._cdf_length"].ravel() #ffff
 
 
@@ -775,7 +772,6 @@ def main(argv):
 
 
 
-    print("gaussian configuration: ",gaussian_configuration)
 
 
     factorized_configuration["beta"] = 10
@@ -796,29 +792,22 @@ def main(argv):
 
     if args.pretrained_stanh:
         print("entro qua!!!!")
-        stanh_checkpoints_p = [args.stanh_path + "/anchors/a2-stanh.pth.tar",args.stanh_path + "/derivations/q4-a2-stanh.pth.tar",
-                         args.stanh_path + "/derivations/q3-a2-stanh.pth.tar"]
-    
-
-
+        stanh_checkpoints_p = [os.path.join(args.stanh_path,f) for f in os.listdir(args.stanh_path )]
         
+       
         stanh_checkpoints = []
 
         for p in stanh_checkpoints_p:
             stanh_checkpoints.append(torch.load(p, map_location=device)) #ddd
 
     else:
-        print("dovrebbe essere corretto, perché")
-        stanh_checkpoints_p = args.stanh_path + "/anchors/a2-stanh.pth.tar"#a3-stanh.pth.tar" #q6-stanh.pth.tar"#a1-stanh.pth.tar"
+        
+        stanh_checkpoints_p = args.stanh_path #+ "/anchors/a2-stanh.pth.tar"#a3-stanh.pth.tar" #q6-stanh.pth.tar"#a1-stanh.pth.tar"
         stanh_checkpoints = []
 
         for _ in range(args.num_stanh):
             stanh_checkpoints.append(torch.load(stanh_checkpoints_p, map_location=device))
 
-
-
-    #define model 
-    architecture =  models["cnn_multi"]
 
     factorized_configurations, gaussian_configurations = [],[]
     for jj in range(args.num_stanh) :
@@ -828,7 +817,7 @@ def main(argv):
         print("DONE")
 
     
-    model =architecture(N = 192, 
+    model = models["cnn_multi"](N = 192, 
                             M = 320, 
                             num_stanh = args.num_stanh,
                             factorized_configuration = factorized_configurations, 
@@ -882,7 +871,7 @@ def main(argv):
 
     train_dataset = ImageFolder(args.dataset, split="train", transform=train_transforms, num_images=args.num_images)
     valid_dataset = ImageFolder(args.dataset, split="test", transform=test_transforms, num_images=args.num_images_val)
-    test_dataset = TestKodakDataset(data_dir="/scratch/dataset/kodak")
+    test_dataset = TestKodakDataset(data_dir=args.test_datapath)
     device = "cuda" 
 
     train_dataloader = DataLoader(
@@ -915,7 +904,6 @@ def main(argv):
 
 
     previous_lr = optimizer.param_groups[0]['lr']
-    print("subito i paramteri dovrebbero essere giusti!")
     model_tr_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
     model_fr_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad== False)
     #fact_gp = args.fact_gp

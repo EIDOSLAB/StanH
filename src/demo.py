@@ -268,7 +268,8 @@ def parse_args(argv):
     
     parser.add_argument("-mc","--model_checkpoint",default="/scratch/inference/new_models/devil2022/rebuttal_model/A40/model/0728_last_.pth.tar",help="path to test mode",)
     parser.add_argument("-sp","--stanh_path",default="/scratch/inference/new_models/devil2022/rebuttal_model/A40/stanh",help="Model architecture (default: %(default)s)",)
-    parser.add_argument("-rp","--save_path",default=None,help="wehre to save results",)
+    parser.add_argument("-rp","--save_path",default="/scratch/stanh/results/json_file",help="wehre to save results",)
+    parser.add_argument("-nf","--name_file",default="output.json",help="wehre to save results",)
     parser.add_argument("-ip","--image_path",default="/scratch/dataset/kodak",help="Model architecture (default: %(default)s)",)
     parser.add_argument("--device",default="cuda",help="device (cuda or cpu)",)
     parser.add_argument("--entropy_estimation", action="store_true", help="Use cuda")
@@ -310,8 +311,7 @@ def main(argv):
 
 
     for i in range(len(stanh_cheks)):
-     
-        print(stanh_cheks[i])
+    
         sc = stanh_cheks[i]#os.path.join(stanh_path,stanh_cheks[i])
         
 
@@ -336,22 +336,27 @@ def main(argv):
 
     
 
-    adding_levels =  [] #None #[0.0001,0.0009,0.001,0.0012,0.00125,0.0014]#[0.0001,0.00025,0.0005,0.00075,0.00075,0.0009,0.001,0.0011,0.00115,0.0012,0.00125,0.0014]
+    adding_levels =  [0.0001,0.00025,0.0005,0.00075,0.00075,0.0009,0.001,0.0011,0.00115,0.0012,0.00125,0.0014]
     start_levels = [0,1,2,3,4,5,6]
     custom_levels = []
+    type_of_point = []
 
 
     for i in start_levels:
         custom_levels.append(i)
+        if i != 3:
+            type_of_point.append("Derivation")
+        else:
+            type_of_point.append("Anchor")
         for j in adding_levels:
             if i != 6:
                 custom_levels.append(i + j)
+                type_of_point.append("Interpolation")
 
 
 
     images_path = args.image_path
-    image_list = [[os.path.join(images_path,f) for f in listdir(images_path)][0]] #ddd
-    print(image_list)
+    image_list = [os.path.join(images_path,f) for f in listdir(images_path)] #ddd
     bpp_, psnr_ = evaluation(model,image_list,entropy_estimation = args.entropy_estimation,device = device, epoch = -10, custom_levels=custom_levels)
     
     
@@ -360,12 +365,14 @@ def main(argv):
     if args.save_path is not None: 
         data = {
             "bpp": bpp_,
-            "psr": psnr
+            "psr": psnr_,
+            "type_of_point":type_of_point
         }
+        
 
 
-        file = os.path.join(args.save_path,"output.json")
-        with open("output.json", "w") as file:
+        file = os.path.join(args.save_path,args.name_file)
+        with open(file, "w") as file:
             json.dump(data, file, indent=4)
 
     psnr_res = {}
