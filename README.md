@@ -53,6 +53,8 @@ pip install -r requirements.txt
 
 Download our pretrained model (based on Zou2022) in the following directory from [here](https://drive.google.com/drive/folders/1LJ6nmQZJyMaJKFzr-sb2C9m9oxHE5pE5).
 
+
+
 ```
 cd src 
 
@@ -66,3 +68,4 @@ python demo.py \
 --device cuda
 ```
 
+Until now, we use Torcach to perform Arithmetic coding (very slow), in future code will be adapted to use RANS as standard model in CompressAI library
