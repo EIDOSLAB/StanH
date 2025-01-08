@@ -1,8 +1,6 @@
 
 import torch 
 import os 
-import numpy as np 
-
 from torchvision import transforms
 from PIL import Image
 import torch
@@ -10,27 +8,19 @@ import json
 import torch.nn.functional as F
 import math
 from compressai.ops import compute_padding
-import math 
 from pytorch_msssim import ms_ssim
-import matplotlib.pyplot as plt
 import numpy as np
 import sys
 import argparse
 from compressai.zoo import *
 import wandb
-from os import listdir
 from compress.utils.annealings import *
 from compress.models.cnn_multiStanh import WACNNMultiSTanH
 torch.backends.cudnn.benchmark = True #sss
-from pytorch_msssim import ms_ssim 
 import wandb
 import seaborn as sns
 palette = sns.color_palette("tab10")
 import matplotlib.pyplot as plt
-
-
-
-import numpy as np
 
 
 
@@ -86,10 +76,10 @@ def evaluation(model,filelist,entropy_estimation,device,epoch = -10, custom_leve
     levels = [i for i in range(model.num_stanh)] if custom_levels is None else custom_levels
     psnr = [AverageMeter() for _ in range(model.num_stanh)] if custom_levels is None else [AverageMeter() for _ in range(len(custom_levels))]
     bpps =[AverageMeter() for _ in range(model.num_stanh)] if custom_levels is None else [AverageMeter() for _ in range(len(custom_levels))]
+    mssim = [AverageMeter() for _ in range(model.num_stanh)] if custom_levels is None else [AverageMeter() for _ in range(len(custom_levels))]
 
 
-
-    bpp_across, psnr_across = [],[]
+    bpp_across, psnr_across, mssim_across = [],[], []
     cont = 0
     for j in levels:
         for i,d in enumerate(filelist):
@@ -138,8 +128,10 @@ def evaluation(model,filelist,entropy_estimation,device,epoch = -10, custom_leve
             
 
             
-            bpps[cont].update(bpp)
-            psnr[cont].update(metrics["psnr"]) #fff
+            bpps[cont].update(round(bpp,3))
+            psnr[cont].update(round(metrics["psnr"],4)) #fff
+            
+            mssim[cont].update(round(-10*math.log10(1 - metrics["ms-ssim"]),4))
 
 
         
@@ -157,6 +149,7 @@ def evaluation(model,filelist,entropy_estimation,device,epoch = -10, custom_leve
 
         bpp_across.append(bpps[cont].avg)
         psnr_across.append(psnr[cont].avg)
+        mssim_across.append(mssim[cont].avg)
 
         cont = cont +1
 
@@ -165,7 +158,7 @@ def evaluation(model,filelist,entropy_estimation,device,epoch = -10, custom_leve
     
 
     #print(bpp_across," RISULTATI ",psnr_across)
-    return bpp_across, psnr_across
+    return bpp_across, psnr_across, mssim_across
 
 
 
@@ -338,7 +331,7 @@ def main(argv):
     
 
     if args.interpolation:
-        adding_levels =  [0.0005,0.00075,0.00075,0.0009,0.001,0.0011,0.00115,0.0012,0.00125,0.0014, 0.0016,0.0018,0.0020]
+        adding_levels =  [0.00025,0.00075,0.00075,0.0009,0.001,0.0011,0.00115,0.0012,0.00125,0.0014, 0.0016,0.0018,0.0020]
     else: 
         adding_levels = []
     start_levels = [0,1,2,3,4,5,6]
@@ -358,8 +351,8 @@ def main(argv):
                 type_of_point.append("Interpolation")
 
 
-    image_list = [args.image_path]#[os.path.join(args.image_path,f) for f in listdir(args.image_path)] #ddd
-    bpp_, psnr_ = evaluation(model,image_list,entropy_estimation = args.entropy_estimation,device = device, epoch = -10, custom_levels=custom_levels)
+    image_list = [os.path.join(args.image_path,f) for f in os.listdir(args.image_path)] #ddd
+    bpp_, psnr_, mssim_= evaluation(model,image_list,entropy_estimation = args.entropy_estimation,device = device, epoch = -10, custom_levels=custom_levels)
     
     
     
@@ -367,7 +360,8 @@ def main(argv):
     if args.save_path is not None: 
         data = {
             "bpp": bpp_,
-            "psr": psnr_,
+            "psnr": psnr_,
+            "ms-ssim": mssim_,
             "type_of_point":type_of_point
         }
         

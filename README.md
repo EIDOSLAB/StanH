@@ -65,6 +65,7 @@ python demo.py \
 --wandb_log #if-ypu-want-wandb-plot \ 
 --entropy_estimation #estimation-of-entropy (faster) 
 --path_save #path-where-to-save-results \
+--interpolation #to include-interpolated-points
 --device cuda
 ```
 
