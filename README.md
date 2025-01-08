@@ -37,7 +37,16 @@ deployment, training time, and storage costs.
 <p><em>The reference learned image compression architecture Zou22  (CNN-based architecture) with two STanH layers for quantizing the main latent space y and the hyperprior latent space z.</em></p>
 </div>
 
+## Preparation 
+In order to use this code, You can create a conda environment, with CUDA if you use GPU (suggested)
 
+```
+conda create -n $NAME python=3.8
+conda activate $NAME
+
+conda install pytorch==1.11.0 torchvision==0.12.0 torchaudio==0.11.0 cudatoolkit=11.3 -c pytorch
+pip install -r requirements.txt
+```
 
 
 ## Validate
