@@ -662,8 +662,8 @@ class SymmetricalTransFormer(CompressionModel):
         self.gaussian_conditional.update()
         print("updated entire model")
 
-    def load_state_dict(self, state_dict):
-        super().load_state_dict(state_dict)
+    def load_state_dict(self, state_dict, strict = True):
+        super().load_state_dict(state_dict,strict = strict)
 
     @classmethod
     def from_state_dict(cls, state_dict):

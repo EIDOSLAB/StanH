@@ -177,3 +177,12 @@ class SymmetricalTransFormerStanH(SymmetricalTransFormer):
             "x_hat": x_hat,
             "likelihoods": {"y": y_likelihoods, "z": z_likelihoods},
         }
+
+
+
+    def load_state_dict(self, state_dict, strict = True, state_dicts_stanh = None):
+        super().load_state_dict(state_dict,strict = strict)
+        
+        if state_dicts_stanh is not None:
+            for i in range(len(state_dicts_stanh)):
+                self.upload_stanh_values(state_dicts_stanh[i]["state_dict"],i)

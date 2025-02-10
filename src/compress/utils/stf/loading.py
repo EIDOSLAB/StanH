@@ -44,7 +44,7 @@ def create_savepath(args):
 
 
 
-def update_checkpopoint(state_dict,num_stanh):
+def InsertStanHOnCheckpoints(state_dict,num_stanh):
 
     res =  OrderedDict()
 
@@ -54,11 +54,6 @@ def update_checkpopoint(state_dict,num_stanh):
             for j in range(num_stanh):
                 adding = str(j) 
                 new_text = k.replace("gaussian_conditional.", "gaussian_conditional." + adding + ".")
-                res[new_text] = state_dict[k]
-        elif "entropy_bottleneck" in k:
-            for j in range(num_stanh):
-                adding = str(j) 
-                new_text = k.replace("entropy_bottleneck.", "entropy_bottleneck." + adding + ".")
                 res[new_text] = state_dict[k]
         else:
             res[k]=state_dict[k]

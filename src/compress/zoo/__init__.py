@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-from compress.models import WACNNSoS,WACNN ,   WACNNMultiSTanH, SymmetricalTransFormer
+from compress.models import WACNNSoS,WACNN ,   WACNNMultiSTanH, SymmetricalTransFormer, SymmetricalTransFormerStanh
 
 from compressai.zoo import *
 from .pretrained import load_pretrained as load_state_dict
@@ -22,6 +22,7 @@ models = {
     'cnn': WACNNSoS,
     "cnn_base": WACNN,
     "cnn_multi": WACNNMultiSTanH,
+    "stf_StanH":SymmetricalTransFormerStanh
 
 
 }
