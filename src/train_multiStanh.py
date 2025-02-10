@@ -791,7 +791,6 @@ def main(argv):
 
 
     if args.pretrained_stanh:
-        print("entro qua!!!!")
         stanh_checkpoints_p = [os.path.join(args.stanh_path,f) for f in os.listdir(args.stanh_path )]
         
        
