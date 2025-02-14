@@ -323,7 +323,7 @@ class GaussianConditionalSoS(HypeEntropyModelSoS):
         *args: Any,
         channels: int = 128, 
         num_sigmoids: int = 1,
-        activation = "sigmoid",
+        activation = "nonlinearstanh",
         beta: int = 1,      
         extrema: int = 10,
         scale_bound: float = 0.11,

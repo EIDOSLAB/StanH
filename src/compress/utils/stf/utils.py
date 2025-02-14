@@ -5,6 +5,20 @@ from pytorch_msssim import ms_ssim
 from torchvision import transforms
 
 
+def configure_latent_space_policy(args):
+    
+    gaussian_configuration = {
+                "beta": 10, 
+                "num_sigmoids": args.gauss_num_sigmoids, 
+                "activation": args.gauss_activation, 
+                "annealing": args.gauss_annealing, 
+                "gap_factor": args.gauss_gp ,
+                "extrema": args.gauss_extrema ,
+     
+            }
+
+
+    return gaussian_configuration
 
 
 def set_seed(seed=123):

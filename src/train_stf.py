@@ -4,7 +4,6 @@ from os.path import join
 from os import listdir
 from torch.utils.data import DataLoader
 from compress.datasets import ImageFolder
-from compress.utils.help_function import  configure_latent_space_policy
 import numpy as np
 from compress.zoo import models, aux_net_models
 from compressai.zoo import *
@@ -18,8 +17,7 @@ from compress.utils.stf.utils import *
 from compress.utils.stf.loading import *
 torch.backends.cudnn.benchmark = True #sss
 import wandb
-
-
+import sys
 
 
 
@@ -85,3 +83,14 @@ def main(argv):
     bpp_init, psnr_init = evaluation(model,image_list,entropy_estimation = args.entropy_estimation,device = device, epoch = -10)
 
     print("finita valutazione iniziale: ",bpp_init," ",psnr_init) #sss
+    
+    
+
+
+if __name__ == "__main__":
+
+    main(sys.argv[1:])
+
+
+
+

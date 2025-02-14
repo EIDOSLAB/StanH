@@ -7,7 +7,7 @@ def parse_args(argv):
     parser.add_argument("-mp","--anchor_path",default="/scratch/inference/new_models/devil2022/",help="Model architecture (default: %(default)s)",)
     parser.add_argument("--device",default="cuda",help="device (cuda or cpu)",)
     parser.add_argument("--wandb_log", action="store_true", help="Use cuda")
-    
+    parser.add_argument("--activation",default="nonlinearstanh",type=str,help="factorized_annealing",)
     parser.add_argument("--lmbda", nargs='+', type=float, default =[0.025])
     
     parser.add_argument("-lr","--learning-rate",default=1e-4,type=float,help="Learning rate (default: %(default)s)",)
@@ -15,6 +15,7 @@ def parse_args(argv):
     parser.add_argument("-d", "--dataset", type=str, default = "/scratch/dataset/openimages", help="Training dataset")
     parser.add_argument("-ni","--num_images",default = 48064, type = int)
     parser.add_argument("-niv","--num_images_val",default = 1024, type = int)
+    parser.add_argument("-ex","--extrema",default = 60, type = int)
 
     parser.add_argument("-sp","--stanh_path",default="/scratch/inference/new_models/devil2022/3_anchors_stanh",help="Model architecture (default: %(default)s)",)#dddd
     
@@ -30,11 +31,9 @@ def parse_args(argv):
     parser.add_argument("--filename",default="/data/",type=str,help="factorized_annealing",)
     
     parser.add_argument("-e","--epochs",default=600,type=int,help="Number of epochs (default: %(default)s)",)
-    parser.add_argument("--fact_gp",default=15,type=int,help="factorized_beta",)
     parser.add_argument("--gauss_gp",default=15,type=int,help="gauss_beta",)
-
-    parser.add_argument("--fact_annealing",default="gap_stoc",type=str,help="factorized_annealing",)
     parser.add_argument("--gauss_annealing",default="gap_stoc",type=str,help="factorized_annealing",)
+    parser.add_argument("--anchor_path",default="/scratch/pretrained_models/stf/stf_013.pth.tar",type=str,help="factorized_annealing",)
     
     parser.add_argument("--num_stanh", type=int, default=1, help="Batch size (default: %(default)s)")
     parser.add_argument("--training_focus",default="stanh_levels",type=str,help="factorized_annealing",)

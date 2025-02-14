@@ -1,6 +1,6 @@
 from .stf import SymmetricalTransFormer 
 import torch.nn as nn
-from compress.entropy_models import  EntropyBottleneckSoS, GaussianConditionalSoS
+from compress.entropy_models import   GaussianConditionalSoS
 import torch
 from compress.ops import ste_round
 import numpy as np
