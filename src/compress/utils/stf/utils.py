@@ -3,7 +3,62 @@ from PIL import Image
 import math
 from pytorch_msssim import ms_ssim
 from torchvision import transforms
+from compress.utils.annealings import RandomAnnealings, Annealing_triangle, Annealings
+import numpy as np
+import wandb
+import shutil
+from datetime import datetime
+from os.path import join 
 
+
+def create_savepath(args):
+    now = datetime.now()
+    date_time = now.strftime("%m%d")
+    suffix = ".pth.tar"
+    c = join(date_time,"last").replace("/","_")
+
+    
+    c_best = join(date_time,"best").replace("/","_")
+    c = join(c,suffix).replace("/","_" + args.lmbda[0])
+    c_best = join(c_best,suffix).replace("/","_"+ args.lmbda[0])
+    
+    
+    path = args.filename
+    savepath = join(path,c)
+    savepath_best = join(path,c_best)
+    
+    print("savepath: ",savepath)
+    print("savepath best: ",savepath_best)
+    return savepath, savepath_best
+
+def configure_annealings( gaussian_configuration):
+
+    if gaussian_configuration is None:
+        annealing_strategy_gaussian = None 
+    elif "random" in gaussian_configuration["annealing"]:
+        annealing_strategy_gaussian = RandomAnnealings(beta = gaussian_configuration["beta"],  type = gaussian_configuration["annealing"], gap = False)
+    elif "none" in gaussian_configuration["annealing"]:
+        annealing_strategy_gaussian = None
+    
+    elif "triangle" in gaussian_configuration["annealing"]:
+        annealing_strategy_gaussian = Annealing_triangle(beta = gaussian_configuration["beta"], 
+                                                         factor = gaussian_configuration["gap_factor"])
+    
+    else:
+        annealing_strategy_gaussian = Annealings(beta = gaussian_configuration["beta"], 
+                                    factor = gaussian_configuration["gap_factor"], 
+                                    type = gaussian_configuration["annealing"]) 
+    
+
+    return annealing_strategy_gaussian
+
+
+def save_checkpoint_our(state, is_best, filename,filename_best):
+    torch.save(state, filename)
+    wandb.save(filename)
+    if is_best:
+        shutil.copyfile(filename, filename_best)
+        wandb.save(filename_best)
 
 def configure_latent_space_policy(args):
     
@@ -14,6 +69,7 @@ def configure_latent_space_policy(args):
                 "annealing": args.gauss_annealing, 
                 "gap_factor": args.gauss_gp ,
                 "extrema": args.gauss_extrema ,
+                "trainable": True
      
             }
 

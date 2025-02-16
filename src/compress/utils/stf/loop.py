@@ -7,6 +7,11 @@ import torch.nn as nn
 from pytorch_msssim import ms_ssim 
 import torch.optim as optim
 from .utils import read_image, bpp_calculation, compute_metrics, psnr, AverageMeter
+from compressai.ops import compute_padding
+import torch.nn.functional as F
+from compress.utils.help_function import compute_msssim, compute_psnr
+
+
 
 def configure_optimizers(net, args):
     """Separate parameters for the main optimizer and the auxiliary optimizer.
@@ -78,11 +83,12 @@ class RateDistortionLoss(nn.Module):
 def train_one_epoch(model, 
                     criterion, 
                     train_dataloader,
-                      optimizer,
-                        epoch, 
-                        clip_max_norm ,
-                        annealing_strategy_gaussian,
-                         lmbda_list = None ):
+                    optimizer,
+                    epoch, 
+                    clip_max_norm ,
+                    counter,
+                    annealing_strategy_gaussian,
+                    lmbda_list = None ):
     model.train()
     device = next(model.parameters()).device
 
@@ -91,7 +97,6 @@ def train_one_epoch(model,
     bpp_loss = AverageMeter()
     mse_loss = AverageMeter()
 
-    fact_beta = AverageMeter()
     gauss_beta = AverageMeter()
 
 
@@ -146,17 +151,10 @@ def train_one_epoch(model,
         wandb.log(wand_dict)
 
 
-        wand_dict = {
-                "general_data/":counter,
-                "general_data/factorized_gap: ": gap[0]
-            }
-            
-        wandb.log(wand_dict)
-
 
         wand_dict = {
                     "general_data":counter,
-                    "general_data/gaussian_gap: ": gap[1]
+                    "general_data/gaussian_gap: ": gap[0]
                 }
                 
         wandb.log(wand_dict)
@@ -164,14 +162,14 @@ def train_one_epoch(model,
         
         if annealing_strategy_gaussian[quality_index] is not None:
             if annealing_strategy_gaussian[quality_index].type == "triangle":
-                annealing_strategy_gaussian[quality_index].step(gap = gap[1])
+                annealing_strategy_gaussian[quality_index].step(gap = gap[0])
                 model.gaussian_conditional[quality_index].sos.beta = annealing_strategy_gaussian[quality_index].beta
             elif "random" in annealing_strategy_gaussian[quality_index].type:
-                annealing_strategy_gaussian[quality_index].step(gap = gap[1])
+                annealing_strategy_gaussian[quality_index].step(gap = gap[0])
                 model.gaussian_conditional[quality_index].sos.beta = annealing_strategy_gaussian[quality_index].beta
             else:
                 lss = out_criterion["loss"].clone().detach().item()
-                annealing_strategy_gaussian[quality_index].step(gap[1], epoch, lss)
+                annealing_strategy_gaussian[quality_index].step(gap[0], epoch, lss)
                 model.gaussian_conditional[quality_index].sos.beta = annealing_strategy_gaussian[quality_index].beta
 
 

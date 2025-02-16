@@ -937,9 +937,7 @@ def main(argv):
         )
 
         loss_valid = test_epoch(epoch, valid_dataloader, model, criterion,  valid = True, lmbda_list = args.lmbda)
-
         loss = test_epoch(epoch, test_dataloader, model, criterion,  valid = False,  lmbda_list = args.lmbda)
-
         lr_scheduler.step(loss_valid)
 
         print(" execute  the test to verify")

@@ -6,6 +6,16 @@ from compress.ops import ste_round
 import numpy as np
 import math
 
+import torch.nn.functional as F
+SCALES_MIN = 0.11
+SCALES_MAX = 256
+SCALES_LEVELS = 64
+
+def get_scale_table(min=SCALES_MIN, max=SCALES_MAX, levels=SCALES_LEVELS):
+    return torch.exp(torch.linspace(math.log(min), math.log(max), levels))
+
+
+
 class SymmetricalTransFormerStanH(SymmetricalTransFormer):
     def __init__(self,
                  pretrain_img_size=256,
@@ -68,7 +78,43 @@ class SymmetricalTransFormerStanH(SymmetricalTransFormer):
         decimal_part = num - floor_num
         return floor_num, ceil_num, decimal_part
     
+    def freeze_net(self):
+        for n,p in self.named_parameters():
+            p.requires_grad = False
+        
+        for p in self.parameters(): 
+            p.requires_grad = False
 
+    def unfreeze_quantizer(self): 
+        for gauss_stanh in self.gaussian_conditional:
+            for p in gauss_stanh.sos.parameters(): 
+                p.requires_grad = True
+
+
+    def update(self, scale_table=None,device = torch.device("cuda")):
+        if scale_table is None:
+            scale_table = get_scale_table() # ottengo la scale table 
+        for i in range(self.num_stanh):
+            self.gaussian_conditional[i].update_scale_table(scale_table)
+            self.gaussian_conditional[i].update(device = device)
+
+
+    def compute_gap(self, inputs, y_hat, gaussian,ind, perms = None):
+        values =  inputs.permute(*perms[0]).contiguous() # flatten y and call it values
+        values = values.reshape(1, 1, -1) # reshape values      
+        y_hat_p =  y_hat.permute(*perms[0]).contiguous() # flatten y and call it values
+        y_hat_p = y_hat_p.reshape(1, 1, -1) # reshape values     
+        with torch.no_grad():    
+            if gaussian: 
+                out = self.gaussian_conditional[ind].sos(values,-1) 
+            else:
+                out = self.entropy_bottleneck[ind].sos(values, -1)
+            # calculate f_tilde:  
+            f_tilde = F.mse_loss(values, y_hat_p)
+            # calculat f_hat
+            f_hat = F.mse_loss(values, out)
+            gap = torch.abs(f_tilde - f_hat)
+        return gap
 
     def define_gaussian_conditional(self,floor,ceil,decimal):
 
@@ -155,7 +201,6 @@ class SymmetricalTransFormerStanH(SymmetricalTransFormer):
             
 
             y_likelihood.append(y_slice_likelihood)
-            y_hat_slice = ste_round(y_slice - mu) + mu
 
             lrp_support = torch.cat([mean_support, y_hat_slice], dim=1)
             lrp = self.lrp_transforms[slice_index](lrp_support)
@@ -173,9 +218,12 @@ class SymmetricalTransFormerStanH(SymmetricalTransFormer):
             y_hat, Wh, Ww = layer(y_hat, Wh, Ww)
 
         x_hat = self.end_conv(y_hat.view(-1, Wh, Ww, self.embed_dim).permute(0, 3, 1, 2).contiguous())
+        y_gap = self.gaussian_conditional[stanh_level].quantize(y, "training" if training else "dequantize", perms = [perm, inv_perm])
+        gap_gaussian = self.compute_gap(y,  y_gap, True,stanh_level, perms =  [perm, inv_perm])
         return {
             "x_hat": x_hat,
             "likelihoods": {"y": y_likelihoods, "z": z_likelihoods},
+             "gap":[gap_gaussian]
         }
 
 

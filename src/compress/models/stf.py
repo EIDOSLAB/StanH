@@ -658,9 +658,7 @@ class SymmetricalTransFormer(CompressionModel):
         self.entropy_bottleneck.update( ) # faccio l'update del primo spazio latente, come factorized
         if scale_table is None:
             scale_table = get_scale_table() # ottengo la scale table 
-        self.gaussian_conditional.update_scale_table(scale_table)
-        self.gaussian_conditional.update()
-        print("updated entire model")
+
 
     def load_state_dict(self, state_dict, strict = True):
         super().load_state_dict(state_dict,strict = strict)
